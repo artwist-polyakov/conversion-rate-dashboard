@@ -1,63 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversion Rate Dashboard</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js" integrity="sha512-j8fX3X7w2P4R0v6DTPoFtB3l62mO28+VVxe+pGFW9Ik3G2zbn+PZkDlOM3XcTsmMCLq+tEvG99u9xGZcW8Z9pg==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js" integrity="sha512-XHk7RtDbsBRXEyjCwZ/jM+F0Dlzpg54f1LVxjXMFP+4hc3c/+jXCRUnXkCT9F0TkPXGQ4f+B7VPZMEha7fs+w==" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/recharts/umd/Recharts.min.js"></script>
+    <title>Дашборд конверсии</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/2.1.9/Recharts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
         .card {
-            width: 100%;
-            max-width: 1024px;
-            margin: 0 auto;
-            border: 1px solid #ddd;
+            background-color: white;
             border-radius: 8px;
-            padding: 16px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
         }
         .card-header {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
-        .card-content {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+        .card-header h2 {
+            margin: 0;
+            font-size: 24px;
         }
         .input-group {
             display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .input-field {
+            display: flex;
             flex-direction: column;
-            gap: 4px;
         }
-        .input-group label {
-            font-weight: bold;
+        label {
+            margin-bottom: 5px;
         }
-        .input-group input {
-            padding: 8px;
+        input {
+            padding: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        .button {
+        button {
             padding: 8px 16px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            align-self: flex-start;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <div id="root"></div>
-    <script>
+
+    <script type="text/babel">
         const { useState, useEffect } = React;
-        const {
-            LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceLine
-        } = Recharts;
+        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceLine } = Recharts;
 
         const ConversionRateDashboard = () => {
             const [conversionRate, setConversionRate] = useState(5.0);
@@ -86,7 +95,7 @@
 
                 for (let i = 0; i < observations; i++) {
                     const dataPoint = { name: i };
-
+                    
                     for (let j = 0; j < numGraphs; j++) {
                         let result = 0;
                         for (let k = 0; k <= i; k++) {
@@ -97,7 +106,7 @@
                         const conversionValue = (result / (i + 1)) * 100;
                         dataPoint[`График ${j + 1}`] = conversionValue;
                     }
-
+                    
                     newData.push(dataPoint);
                 }
 
@@ -131,42 +140,46 @@
 
             return (
                 <div className="card">
-                    <div className="card-header">Дашборд конверсии</div>
+                    <div className="card-header">
+                        <h2>Дашборд конверсии</h2>
+                    </div>
                     <div className="card-content">
                         <div className="input-group">
-                            <label htmlFor="conversion-rate">Конверсия (%)</label>
-                            <input
-                                id="conversion-rate"
-                                type="number"
-                                value={conversionRate}
-                                onChange={handleConversionRateChange}
-                                min="0"
-                                max="100"
-                                step="0.1"
-                            />
+                            <div className="input-field">
+                                <label htmlFor="conversion-rate">Конверсия (%)</label>
+                                <input
+                                    id="conversion-rate"
+                                    type="number"
+                                    value={conversionRate}
+                                    onChange={handleConversionRateChange}
+                                    min="0"
+                                    max="100"
+                                    step="0.1"
+                                />
+                            </div>
+                            <div className="input-field">
+                                <label htmlFor="observations">Число наблюдений</label>
+                                <input
+                                    id="observations"
+                                    type="number"
+                                    value={observations}
+                                    onChange={(e) => setObservations(Number(e.target.value))}
+                                    min="1"
+                                />
+                            </div>
+                            <div className="input-field">
+                                <label htmlFor="num-graphs">Число графиков</label>
+                                <input
+                                    id="num-graphs"
+                                    type="number"
+                                    value={numGraphs}
+                                    onChange={(e) => setNumGraphs(Math.min(Math.max(Number(e.target.value), 1), 10))}
+                                    min="1"
+                                    max="10"
+                                />
+                            </div>
+                            <button onClick={generateData}>Построить график</button>
                         </div>
-                        <div className="input-group">
-                            <label htmlFor="observations">Число наблюдений</label>
-                            <input
-                                id="observations"
-                                type="number"
-                                value={observations}
-                                onChange={(e) => setObservations(Number(e.target.value))}
-                                min="1"
-                            />
-                        </div>
-                        <div className="input-group">
-                            <label htmlFor="num-graphs">Число графиков</label>
-                            <input
-                                id="num-graphs"
-                                type="number"
-                                value={numGraphs}
-                                onChange={(e) => setNumGraphs(Math.min(Math.max(Number(e.target.value), 1), 10))}
-                                min="1"
-                                max="10"
-                            />
-                        </div>
-                        <button onClick={generateData} className="button">Построить график</button>
                         <ResponsiveContainer width="100%" height={400}>
                             <LineChart data={data}>
                                 <CartesianGrid strokeDasharray="3 3" />
@@ -196,8 +209,13 @@
                                     />
                                 ))}
                             </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            );
+        };
 
-
-
-);
-};
+        ReactDOM.render(<ConversionRateDashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
