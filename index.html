@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Дашборд конверсии</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/recharts/umd/Recharts.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -64,9 +60,12 @@
 <body>
     <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceLine } = Recharts;
+    <script type="module">
+        import React, { useState, useEffect } from 'https://cdn.jsdelivr.net/npm/react@17/umd/react.production.min.js';
+        import ReactDOM from 'https://cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.production.min.js';
+        import {
+            LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceLine
+        } from 'https://cdn.jsdelivr.net/npm/recharts@2.0.9/umd/Recharts.js';
 
         const ConversionRateDashboard = () => {
             const [conversionRate, setConversionRate] = useState(5.0);
