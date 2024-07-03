@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversion Rate Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/recharts/umd/Recharts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <style>
+        .card {
+            width: 100%;
+            max-width: 1024px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .input-group label {
+            font-weight: bold;
+        }
+        .input-group input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        const { useState, useEffect } = React;
+        const {
+            LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceLine
+        } = Recharts;
+
+        const ConversionRateDashboard = () => {
+            const [conversionRate, setConversionRate] = useState(5.0);
+            const [observations, setObservations] = useState(100);
+            const [numGraphs, setNumGraphs] = useState(5);
+            const [data, setData] = useState([]);
+
+            const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c', '#d88cf0', '#8c9ef0', '#f08c8c', '#8cf0cf', '#f0e68c'];
+
+            const smoothData = (data, windowSize = 5) => {
+                return data.map((point, index, array) => {
+                    const smoothedPoint = { ...point };
+                    Object.keys(point).forEach(key => {
+                        if (key !== 'name') {
+                            const window = array.slice(Math.max(0, index - windowSize + 1), index + 1);
+                            const sum = window.reduce((acc, curr) => acc + curr[key], 0);
+                            smoothedPoint[key] = sum / window.length;
+                        }
+                    });
+                    return smoothedPoint;
+                });
+            };
+
+            const generateData = () => {
+                const newData = [];
+
+                for (let i = 0; i < observations; i++) {
+                    const dataPoint = { name: i };
+
+                    for (let j = 0; j < numGraphs; j++) {
+                        let result = 0;
+                        for (let k = 0; k <= i; k++) {
+                            if (Math.random() < conversionRate / 100) {
+                                result++;
+                            }
+                        }
+                        const conversionValue = (result / (i + 1)) * 100;
+                        dataPoint[`График ${j + 1}`] = conversionValue;
+                    }
+
+                    newData.push(dataPoint);
+                }
+
+                const smoothedData = observations > 100 ? smoothData(newData) : newData;
+                setData(smoothedData);
+            };
+
+            useEffect(() => {
+                generateData();
+            }, []);
+
+            const formatXAxis = (tickItem) => {
+                return tickItem.toString();
+            };
+
+            const formatYAxis = (tickItem) => {
+                return `${tickItem}%`;
+            };
+
+            const getXAxisTicks = () => {
+                const step = Math.floor(observations / 9);
+                return [0, ...Array(8).fill().map((_, i) => (i + 1) * step), observations - 1];
+            };
+
+            const handleConversionRateChange = (e) => {
+                const value = parseFloat(e.target.value);
+                if (!isNaN(value) && value >= 0 && value <= 100) {
+                    setConversionRate(value);
+                }
+            };
+
+            return (
+                <div className="card">
+                    <div className="card-header">Дашборд конверсии</div>
+                    <div className="card-content">
+                        <div className="input-group">
+                            <label htmlFor="conversion-rate">Конверсия (%)</label>
+                            <input
+                                id="conversion-rate"
+                                type="number"
+                                value={conversionRate}
+                                onChange={handleConversionRateChange}
+                                min="0"
+                                max="100"
+                                step="0.1"
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label htmlFor="observations">Число наблюдений</label>
+                            <input
+                                id="observations"
+                                type="number"
+                                value={observations}
+                                onChange={(e) => setObservations(Number(e.target.value))}
+                                min="1"
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label htmlFor="num-graphs">Число графиков</label>
+                            <input
+                                id="num-graphs"
+                                type="number"
+                                value={numGraphs}
+                                onChange={(e) => setNumGraphs(Math.min(Math.max(Number(e.target.value), 1), 10))}
+                                min="1"
+                                max="10"
+                            />
+                        </div>
+                        <button onClick
