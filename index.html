@@ -19,13 +19,6 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .card-header {
-            margin-bottom: 20px;
-        }
-        .card-header h2 {
-            margin: 0;
-            font-size: 24px;
-        }
         .input-group {
             display: flex;
             flex-wrap: wrap;
@@ -60,161 +53,182 @@
 <body>
     <div id="root"></div>
 
-    <script type="module">
-        import React, { useState, useEffect } from 'https://cdn.jsdelivr.net/npm/react@17/umd/react.production.min.js';
-        import ReactDOM from 'https://cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.production.min.js';
-        import {
-            LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Label, ReferenceLine
-        } from 'https://cdn.jsdelivr.net/npm/recharts@2.0.9/umd/Recharts.js';
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.1.9/umd/Recharts.min.js"></script>
 
-        const ConversionRateDashboard = () => {
-            const [conversionRate, setConversionRate] = useState(5.0);
-            const [observations, setObservations] = useState(100);
-            const [numGraphs, setNumGraphs] = useState(5);
-            const [data, setData] = useState([]);
+    <script>
+        function loadDashboard() {
+            const e = React.createElement;
+            const useState = React.useState;
+            const useEffect = React.useEffect;
+            const LineChart = Recharts.LineChart;
+            const Line = Recharts.Line;
+            const XAxis = Recharts.XAxis;
+            const YAxis = Recharts.YAxis;
+            const CartesianGrid = Recharts.CartesianGrid;
+            const Tooltip = Recharts.Tooltip;
+            const Legend = Recharts.Legend;
+            const ResponsiveContainer = Recharts.ResponsiveContainer;
+            const Label = Recharts.Label;
+            const ReferenceLine = Recharts.ReferenceLine;
 
-            const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c', '#d88cf0', '#8c9ef0', '#f08c8c', '#8cf0cf', '#f0e68c'];
+            const ConversionRateDashboard = () => {
+                const [conversionRate, setConversionRate] = useState(5.0);
+                const [observations, setObservations] = useState(100);
+                const [numGraphs, setNumGraphs] = useState(5);
+                const [data, setData] = useState([]);
 
-            const smoothData = (data, windowSize = 5) => {
-                return data.map((point, index, array) => {
-                    const smoothedPoint = { ...point };
-                    Object.keys(point).forEach(key => {
-                        if (key !== 'name') {
-                            const window = array.slice(Math.max(0, index - windowSize + 1), index + 1);
-                            const sum = window.reduce((acc, curr) => acc + curr[key], 0);
-                            smoothedPoint[key] = sum / window.length;
-                        }
-                    });
-                    return smoothedPoint;
-                });
-            };
+                const colors = ['#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#a4de6c', '#d88cf0', '#8c9ef0', '#f08c8c', '#8cf0cf', '#f0e68c'];
 
-            const generateData = () => {
-                const newData = [];
-
-                for (let i = 0; i < observations; i++) {
-                    const dataPoint = { name: i };
-
-                    for (let j = 0; j < numGraphs; j++) {
-                        let result = 0;
-                        for (let k = 0; k <= i; k++) {
-                            if (Math.random() < conversionRate / 100) {
-                                result++;
+                const smoothData = (data, windowSize = 5) => {
+                    return data.map((point, index, array) => {
+                        const smoothedPoint = { ...point };
+                        Object.keys(point).forEach(key => {
+                            if (key !== 'name') {
+                                const window = array.slice(Math.max(0, index - windowSize + 1), index + 1);
+                                const sum = window.reduce((acc, curr) => acc + curr[key], 0);
+                                smoothedPoint[key] = sum / window.length;
                             }
+                        });
+                        return smoothedPoint;
+                    });
+                };
+
+                const generateData = () => {
+                    const newData = [];
+
+                    for (let i = 0; i < observations; i++) {
+                        const dataPoint = { name: i };
+                        
+                        for (let j = 0; j < numGraphs; j++) {
+                            let result = 0;
+                            for (let k = 0; k <= i; k++) {
+                                if (Math.random() < conversionRate / 100) {
+                                    result++;
+                                }
+                            }
+                            const conversionValue = (result / (i + 1)) * 100;
+                            dataPoint[`График ${j + 1}`] = conversionValue;
                         }
-                        const conversionValue = (result / (i + 1)) * 100;
-                        dataPoint[`График ${j + 1}`] = conversionValue;
+                        
+                        newData.push(dataPoint);
                     }
 
-                    newData.push(dataPoint);
-                }
+                    const smoothedData = observations > 100 ? smoothData(newData) : newData;
+                    setData(smoothedData);
+                };
 
-                const smoothedData = observations > 100 ? smoothData(newData) : newData;
-                setData(smoothedData);
+                useEffect(() => {
+                    generateData();
+                }, []);
+
+                const formatXAxis = (tickItem) => {
+                    return tickItem.toString();
+                };
+
+                const formatYAxis = (tickItem) => {
+                    return `${tickItem}%`;
+                };
+
+                const getXAxisTicks = () => {
+                    const step = Math.floor(observations / 9);
+                    return [0, ...Array(8).fill().map((_, i) => (i + 1) * step), observations - 1];
+                };
+
+                const handleConversionRateChange = (event) => {
+                    const value = parseFloat(event.target.value);
+                    if (!isNaN(value) && value >= 0 && value <= 100) {
+                        setConversionRate(value);
+                    }
+                };
+
+                return e('div', {className: 'card'},
+                    e('h2', null, 'Дашборд конверсии'),
+                    e('div', {className: 'input-group'},
+                        e('div', {className: 'input-field'},
+                            e('label', {htmlFor: 'conversion-rate'}, 'Конверсия (%)'),
+                            e('input', {
+                                id: 'conversion-rate',
+                                type: 'number',
+                                value: conversionRate,
+                                onChange: handleConversionRateChange,
+                                min: '0',
+                                max: '100',
+                                step: '0.1'
+                            })
+                        ),
+                        e('div', {className: 'input-field'},
+                            e('label', {htmlFor: 'observations'}, 'Число наблюдений'),
+                            e('input', {
+                                id: 'observations',
+                                type: 'number',
+                                value: observations,
+                                onChange: (event) => setObservations(Number(event.target.value)),
+                                min: '1'
+                            })
+                        ),
+                        e('div', {className: 'input-field'},
+                            e('label', {htmlFor: 'num-graphs'}, 'Число графиков'),
+                            e('input', {
+                                id: 'num-graphs',
+                                type: 'number',
+                                value: numGraphs,
+                                onChange: (event) => setNumGraphs(Math.min(Math.max(Number(event.target.value), 1), 10)),
+                                min: '1',
+                                max: '10'
+                            })
+                        ),
+                        e('button', {onClick: generateData}, 'Построить график')
+                    ),
+                    e(ResponsiveContainer, {width: '100%', height: 400},
+                        e(LineChart, {data: data},
+                            e(CartesianGrid, {strokeDasharray: '3 3'}),
+                            e(XAxis, {
+                                dataKey: 'name',
+                                tickFormatter: formatXAxis,
+                                ticks: getXAxisTicks()
+                            }, e(Label, {value: 'N набл', offset: -5, position: 'insideBottom'})),
+                            e(YAxis, {tickFormatter: formatYAxis},
+                                e(Label, {value: 'набл. CR', angle: -90, position: 'insideLeft', style: {textAnchor: 'middle'}})
+                            ),
+                            e(Tooltip, {formatter: (value) => `${value.toFixed(2)}%`}),
+                            e(Legend),
+                            e(ReferenceLine, {
+                                y: conversionRate,
+                                stroke: 'red',
+                                strokeWidth: 3,
+                                strokeDasharray: '3 3'
+                            }, e(Label, {value: `Целевая конверсия: ${conversionRate.toFixed(2)}%`, position: 'right'})),
+                            ...Array(numGraphs).fill().map((_, index) =>
+                                e(Line, {
+                                    key: `График ${index + 1}`,
+                                    type: 'monotone',
+                                    dataKey: `График ${index + 1}`,
+                                    stroke: colors[index % colors.length],
+                                    strokeWidth: 2,
+                                    dot: false
+                                })
+                            )
+                        )
+                    )
+                );
             };
 
-            useEffect(() => {
-                generateData();
-            }, []);
+            ReactDOM.render(e(ConversionRateDashboard), document.getElementById('root'));
+        }
 
-            const formatXAxis = (tickItem) => {
-                return tickItem.toString();
-            };
+        // Проверка загрузки зависимостей
+        function checkDependencies() {
+            if (window.React && window.ReactDOM && window.Recharts) {
+                loadDashboard();
+            } else {
+                setTimeout(checkDependencies, 100);
+            }
+        }
 
-            const formatYAxis = (tickItem) => {
-                return `${tickItem}%`;
-            };
-
-            const getXAxisTicks = () => {
-                const step = Math.floor(observations / 9);
-                return [0, ...Array(8).fill().map((_, i) => (i + 1) * step), observations - 1];
-            };
-
-            const handleConversionRateChange = (e) => {
-                const value = parseFloat(e.target.value);
-                if (!isNaN(value) && value >= 0 && value <= 100) {
-                    setConversionRate(value);
-                }
-            };
-
-            return (
-                <div className="card">
-                    <div className="card-header">
-                        <h2>Дашборд конверсии</h2>
-                    </div>
-                    <div className="card-content">
-                        <div className="input-group">
-                            <div className="input-field">
-                                <label htmlFor="conversion-rate">Конверсия (%)</label>
-                                <input
-                                    id="conversion-rate"
-                                    type="number"
-                                    value={conversionRate}
-                                    onChange={handleConversionRateChange}
-                                    min="0"
-                                    max="100"
-                                    step="0.1"
-                                />
-                            </div>
-                            <div className="input-field">
-                                <label htmlFor="observations">Число наблюдений</label>
-                                <input
-                                    id="observations"
-                                    type="number"
-                                    value={observations}
-                                    onChange={(e) => setObservations(Number(e.target.value))}
-                                    min="1"
-                                />
-                            </div>
-                            <div className="input-field">
-                                <label htmlFor="num-graphs">Число графиков</label>
-                                <input
-                                    id="num-graphs"
-                                    type="number"
-                                    value={numGraphs}
-                                    onChange={(e) => setNumGraphs(Math.min(Math.max(Number(e.target.value), 1), 10))}
-                                    min="1"
-                                    max="10"
-                                />
-                            </div>
-                            <button onClick={generateData}>Построить график</button>
-                        </div>
-                        <ResponsiveContainer width="100%" height={400}>
-                            <LineChart data={data}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis
-                                    dataKey="name"
-                                    tickFormatter={formatXAxis}
-                                    ticks={getXAxisTicks()}
-                                >
-                                    <Label value="N набл" offset={-5} position="insideBottom" />
-                                </XAxis>
-                                <YAxis tickFormatter={formatYAxis}>
-                                    <Label value="набл. CR" angle={-90} position="insideLeft" style={{ textAnchor: 'middle' }} />
-                                </YAxis>
-                                <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
-                                <Legend />
-                                <ReferenceLine y={conversionRate} stroke="red" strokeWidth={3} strokeDasharray="3 3">
-                                    <Label value={`Целевая конверсия: ${conversionRate.toFixed(2)}%`} position="right" />
-                                </ReferenceLine>
-                                {[...Array(numGraphs)].map((_, index) => (
-                                    <Line
-                                        key={`График ${index + 1}`}
-                                        type="monotone"
-                                        dataKey={`График ${index + 1}`}
-                                        stroke={colors[index % colors.length]}
-                                        strokeWidth={2}
-                                        dot={false}
-                                    />
-                                ))}
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                </div>
-            );
-        };
-
-        ReactDOM.render(<ConversionRateDashboard />, document.getElementById('root'));
+        // Запуск проверки после загрузки страницы
+        window.onload = checkDependencies;
     </script>
 </body>
 </html>
