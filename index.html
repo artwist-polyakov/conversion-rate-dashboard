@@ -54,9 +54,10 @@
         }
         canvas {
             width: 100%;
-            max-width: 760px;
+            max-width: 800px;
             height: 400px;
-            margin-top: 20px;
+            margin: 20px auto;
+            display: block;
         }
     </style>
 </head>
@@ -123,7 +124,10 @@
             
             const width = canvas.width;
             const height = canvas.height;
-            const padding = 40;
+            const leftPadding = 60;
+            const rightPadding = 20;
+            const topPadding = 20;
+            const bottomPadding = 40;
             
             ctx.clearRect(0, 0, width, height);
             
@@ -132,18 +136,18 @@
             
             // Рисуем оси
             ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, height - padding);
-            ctx.lineTo(width - padding, height - padding);
+            ctx.moveTo(leftPadding, topPadding);
+            ctx.lineTo(leftPadding, height - bottomPadding);
+            ctx.lineTo(width - rightPadding, height - bottomPadding);
             ctx.stroke();
             
             // Рисуем линию целевой конверсии
-            const targetY = height - padding - (targetRate / maxValue) * (height - 2 * padding);
+            const targetY = height - bottomPadding - (targetRate / maxValue) * (height - topPadding - bottomPadding);
             ctx.beginPath();
             ctx.strokeStyle = 'red';
             ctx.setLineDash([5, 5]);
-            ctx.moveTo(padding, targetY);
-            ctx.lineTo(width - padding, targetY);
+            ctx.moveTo(leftPadding, targetY);
+            ctx.lineTo(width - rightPadding, targetY);
             ctx.stroke();
             ctx.setLineDash([]);
             
@@ -153,8 +157,8 @@
                 ctx.beginPath();
                 ctx.strokeStyle = colors[index % colors.length];
                 simulation.forEach((value, i) => {
-                    const x = padding + (i / (simulation.length - 1)) * (width - 2 * padding);
-                    const y = height - padding - (value / maxValue) * (height - 2 * padding);
+                    const x = leftPadding + (i / (simulation.length - 1)) * (width - leftPadding - rightPadding);
+                    const y = height - bottomPadding - (value / maxValue) * (height - topPadding - bottomPadding);
                     if (i === 0) {
                         ctx.moveTo(x, y);
                     } else {
@@ -171,24 +175,25 @@
             ctx.textBaseline = 'middle';
             for (let i = 0; i <= 10; i++) {
                 const value = (maxValue * i / 10).toFixed(1);
-                const y = height - padding - (i / 10) * (height - 2 * padding);
-                ctx.fillText(value + '%', padding - 5, y);
+                const y = height - bottomPadding - (i / 10) * (height - topPadding - bottomPadding);
+                ctx.fillText(value + '%', leftPadding - 5, y);
             }
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
             for (let i = 0; i <= 10; i++) {
                 const value = Math.round(data[0].length * i / 10);
-                const x = padding + (i / 10) * (width - 2 * padding);
-                ctx.fillText(value, x, height - padding + 5);
+                const x = leftPadding + (i / 10) * (width - leftPadding - rightPadding);
+                ctx.fillText(value, x, height - bottomPadding + 5);
             }
             
             // Подписи осей
             ctx.save();
-            ctx.translate(20, height / 2); // Изменено с 10 на 20, чтобы переместить подпись левее
+            ctx.translate(15, height / 2);
             ctx.rotate(-Math.PI / 2);
             ctx.textAlign = 'center';
             ctx.fillText('Конверсия (%)', 0, 0);
             ctx.restore();
+            ctx.textAlign = 'center';
             ctx.fillText('Число наблюдений', width / 2, height - 10);
         }
         
